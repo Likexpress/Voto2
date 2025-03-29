@@ -30,27 +30,21 @@ migrate = Migrate(app, db)
 # ---------------------------
 class Voto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-<<<<<<< HEAD
     numero = db.Column(db.String(50), unique=True, nullable=False, index=True)  # ✅ Índice agregado
     ci = db.Column(db.BigInteger, unique=True, nullable=False, index=True)      # ✅ Índice agregado
-=======
-    numero = db.Column(db.String(50), unique=True, nullable=False)
-    ci = db.Column(db.BigInteger, unique=True, nullable=False)
->>>>>>> 6b136e3a2f5e04e28d32e0a652c8991dababba96
     candidato = db.Column(db.String(100), nullable=False)
     pais = db.Column(db.String(100), nullable=False)
     ciudad = db.Column(db.String(100), nullable=False)
     dia_nacimiento = db.Column(db.Integer, nullable=False)
     mes_nacimiento = db.Column(db.Integer, nullable=False)
     anio_nacimiento = db.Column(db.Integer, nullable=False)
+    latitud = db.Column(db.Float, nullable=True)
+    longitud = db.Column(db.Float, nullable=True)
     ip = db.Column(db.String(50), nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 6b136e3a2f5e04e28d32e0a652c8991dababba96
 with app.app_context():
     db.create_all()
 
