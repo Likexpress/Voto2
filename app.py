@@ -120,6 +120,13 @@ def votar():
         return render_template("voto_ya_registrado.html")
     return render_template("votar.html", numero=numero, recaptcha_site_key="")
 
+
+@app.route('/preguntas')
+def preguntas_frecuentes():
+    return render_template("preguntas.html")
+
+
+
 @app.route('/enviar_voto', methods=['POST'])
 def enviar_voto():
     numero = request.form.get('numero')
