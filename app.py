@@ -103,7 +103,7 @@ def generar_link():
             return render_template("voto_ya_registrado.html")
 
         # Si no ha votado, lo redirige al WhatsApp
-        return redirect("https://wa.me/59172902813?text=Quiero%20votar🇧🇴")
+        return redirect("https://wa.me/59172902813?text=Quiero%20votar")
 
     return render_template("generar_link.html", paises=PAISES_CODIGOS)
 
