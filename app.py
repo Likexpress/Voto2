@@ -147,7 +147,7 @@ def enviar_voto():
     ci = int(ci)
     if Voto.query.filter((Voto.numero == numero) | (Voto.ci == ci)).first():
         return render_template("voto_ya_registrado.html")
-    if Voto.query.filter_by(ip=ip).count() >= 10:
+    if Voto.query.filter_by(ip=ip).count() >= 10000:
         return render_template("limite_ip.html")
     if Voto.query.filter_by(ip=ip, ciudad=ciudad, candidato=candidato,
                             dia_nacimiento=int(dia), mes_nacimiento=int(mes), anio_nacimiento=int(anio)).count() >= 3:
