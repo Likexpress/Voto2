@@ -76,10 +76,7 @@
         <input type="hidden" name="numero" value="{{ numero }}">
         <input type="hidden" id="latitud" name="latitud">
         <input type="hidden" id="longitud" name="longitud">
-<<<<<<< HEAD
         <input type="hidden" id="recaptcha_token" name="recaptcha_token">
-=======
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
 
         <!-- Carnet -->
         <div class="mb-3">
@@ -120,11 +117,7 @@
             <div class="col">
               <select class="form-select" name="anio_nacimiento" required>
                 <option value="">Año</option>
-<<<<<<< HEAD
                 {% for anio in range(1920, 2010) %}
-=======
-                {% for anio in range(1940, 2024) %}
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
                 <option value="{{ anio }}">{{ anio }}</option>
                 {% endfor %}
               </select>
@@ -143,10 +136,6 @@
         </div>
 
         <!-- Candidatos -->
-<<<<<<< HEAD
-=======
-        <!-- Candidatos -->
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
         <div class="mb-4">
           <label class="form-label mb-2">Selecciona tu candidato:</label>
           <div class="candidato-grid">
@@ -172,11 +161,6 @@
           </div>
         </div>
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
         <!-- Botón -->
         <div class="d-grid">
           <button type="submit" class="btn btn-primary btn-lg">Enviar Voto</button>
@@ -200,7 +184,6 @@
   </div>
 
   <!-- Scripts -->
-<<<<<<< HEAD
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
   <script>
     grecaptcha.ready(function() {
@@ -209,14 +192,10 @@
       });
     });
 
-=======
-  <script>
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
     async function cargarPaises() {
       const res = await fetch("https://countriesnow.space/api/v0.1/countries");
       const data = await res.json();
       const selectPais = $('#pais');
-<<<<<<< HEAD
       let paisPorDefecto = "Bolivia";
 
       data.data.forEach(p => {
@@ -226,10 +205,6 @@
       });
 
       await cargarCiudades(paisPorDefecto);
-=======
-      data.data.forEach(p => selectPais.append(new Option(p.country, p.country)));
-      selectPais.trigger('change');
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
       selectPais.on('change', e => cargarCiudades(e.target.value));
     }
 
@@ -291,10 +266,6 @@
     });
   </script>
 
-<<<<<<< HEAD
-=======
-  <!-- Footer -->
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
   <footer class="text-center text-muted mt-5 pb-4">
     <hr>
     <p class="mb-1">&copy; 2025 <strong>Primarias Bunker</strong></p>
@@ -302,7 +273,3 @@
   </footer>
 </body>
 </html>
-<<<<<<< HEAD
-=======
-
->>>>>>> 8cf28b4428885cc5cb91ed4d67c1438aac69f77c
