@@ -39,6 +39,7 @@
 
     <h3><strong>¡Bienvenido a las Votaciones Primarias 2025!</strong></h3>
     <p class="text-muted">Para comenzar, selecciona tu país e ingresa tu número de WhatsApp. Recuerda que solo puedes votar una vez por número.</p>
+
     <form method="POST">
       <div class="mb-3 text-start">
         <label for="pais" class="form-label">País</label>
@@ -48,14 +49,17 @@
             <option value="{{ codigo }}" {% if nombre == 'Bolivia' %}selected{% endif %}>{{ nombre }} ({{ codigo }})</option>
           {% endfor %}
         </select>
-
       </div>
+
       <div class="mb-3 text-start">
         <label for="numero" class="form-label">Número de WhatsApp</label>
         <input type="text" name="numero" id="numero" class="form-control" placeholder="Ej: 70000000" required>
       </div>
+
       <button type="submit" class="btn btn-success w-100">Obtener enlace de votación</button>
     </form>
+
+    <a href="{{ url_for('preguntas_frecuentes') }}" class="btn btn-outline-secondary mt-3 w-100">Preguntas Frecuentes</a>
   </div>
 
   <footer class="mt-4">
