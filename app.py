@@ -4,19 +4,27 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from datetime import datetime
 from dotenv import load_dotenv
 import os
-import requests
 
+# ---------------------------
+# Cargar configuración
+# ---------------------------
 load_dotenv()
 
 app = Flask(__name__)
 SECRET_KEY = os.environ.get("SECRET_KEY", "clave-super-secreta")
 serializer = URLSafeSerializer(SECRET_KEY)
 
+# ---------------------------
+# Base de datos
+# ---------------------------
 db_url = os.environ.get("DATABASE_URL", "sqlite:///votos.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# ---------------------------
+# Modelo de votos
+# ---------------------------
 class Voto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     numero = db.Column(db.String(50), unique=True, nullable=False)
@@ -27,62 +35,22 @@ class Voto(db.Model):
     dia_nacimiento = db.Column(db.Integer, nullable=False)
     mes_nacimiento = db.Column(db.Integer, nullable=False)
     anio_nacimiento = db.Column(db.Integer, nullable=False)
-    latitud = db.Column(db.Float, nullable=True)
-    longitud = db.Column(db.Float, nullable=True)
     ip = db.Column(db.String(50), nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
 with app.app_context():
     db.create_all()
 
+# ---------------------------
+# Página inicial
+# ---------------------------
 @app.route('/')
 def index():
     return redirect('/generar_link')
 
-@app.route('/whatsapp', methods=['POST'])
-def whatsapp_webhook():
-    data = request.json
-    print("📥 JSON recibido:", data)
-    try:
-        entry = data['entry'][0]
-        changes = entry['changes'][0]
-        value = changes['value']
-        messages = value.get('messages')
-
-        if not messages:
-            return "ok", 200
-
-        message = messages[0]
-        numero = message['from']
-        texto = message['text']['body'].strip().lower()
-
-        if "votar" in texto:
-            token = serializer.dumps("+" + numero)
-            link = f"https://primariasbunker.org/votar?token={token}"
-            url = "https://waba-v2.360dialog.io/messages"
-            headers = {
-                "Content-Type": "application/json",
-                "D360-API-KEY": os.environ.get("WABA_TOKEN")
-            }
-            body = {
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": numero,
-                "type": "text",
-                "text": {
-                    "preview_url": False,
-                    "body": f"Hola, gracias por participar en las Primarias Bolivia 2025.\n\nAquí tienes tu enlace único para votar:\n{link}"
-                }
-            }
-            r = requests.post(url, headers=headers, json=body)
-            if r.status_code == 200:
-                print("✅ Enlace enviado correctamente por WhatsApp.")
-            else:
-                print("❌ Error al enviar respuesta:", r.text)
-    except Exception as e:
-        print("❌ Error al procesar mensaje:", str(e))
-    return "ok", 200
-
+# ---------------------------
+# Generar link de votación
+# ---------------------------
 @app.route('/generar_link', methods=['GET', 'POST'])
 def generar_link():
     if request.method == 'POST':
@@ -94,39 +62,40 @@ def generar_link():
 
         numero = numero.replace(" ", "").replace("-", "")
         if not pais.startswith("+"):
-            return "El formato del código de país es incorrecto."
+            return "Código de país inválido."
 
         numero_completo = pais + numero
 
-        # 🔒 Verificar si ya votó
+        # Verificar si ya votó
         if Voto.query.filter_by(numero=numero_completo).first():
             return render_template("voto_ya_registrado.html")
 
-        # Si no ha votado, lo redirige al WhatsApp
         return redirect("https://wa.me/59172902813?text=Quiero%20votar")
 
     return render_template("generar_link.html", paises=PAISES_CODIGOS)
 
+# ---------------------------
+# Página para emitir voto
+# ---------------------------
 @app.route('/votar')
 def votar():
     token = request.args.get('token')
     if not token:
         return "Acceso no válido."
+
     try:
         numero = serializer.loads(token)
     except BadSignature:
         return "Enlace inválido o alterado."
+
     if Voto.query.filter_by(numero=numero).first():
         return render_template("voto_ya_registrado.html")
-    return render_template("votar.html", numero=numero, recaptcha_site_key="")
 
+    return render_template("votar.html", numero=numero)
 
-@app.route('/preguntas')
-def preguntas_frecuentes():
-    return render_template("preguntas.html")
-
-
-
+# ---------------------------
+# Enviar voto
+# ---------------------------
 @app.route('/enviar_voto', methods=['POST'])
 def enviar_voto():
     numero = request.form.get('numero')
@@ -137,35 +106,17 @@ def enviar_voto():
     dia = request.form.get('dia_nacimiento')
     mes = request.form.get('mes_nacimiento')
     anio = request.form.get('anio_nacimiento')
-    lat = request.form.get('latitud')
-    lon = request.form.get('longitud')
+
     ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
 
-    if not all([numero, ci, pais, ciudad, dia, mes, anio, candidato]):
+    if not all([numero, ci, candidato, pais, ciudad, dia, mes, anio]):
         return "Faltan campos obligatorios."
 
     ci = int(ci)
+
+    # Validar que no haya votado con ese número o CI
     if Voto.query.filter((Voto.numero == numero) | (Voto.ci == ci)).first():
         return render_template("voto_ya_registrado.html")
-    if Voto.query.filter_by(ip=ip).count() >= 10000:
-        return render_template("limite_ip.html")
-    if Voto.query.filter_by(ip=ip, ciudad=ciudad, candidato=candidato,
-                            dia_nacimiento=int(dia), mes_nacimiento=int(mes), anio_nacimiento=int(anio)).count() >= 3:
-        return render_template("voto_sospechoso.html")
-
-    try:
-        if lat and lon:
-            res = requests.get("https://nominatim.openstreetmap.org/reverse", params={
-                "format": "json", "lat": lat, "lon": lon, "zoom": 10, "addressdetails": 1
-            }, headers={"User-Agent": "VotacionCiudadana/1.0"})
-            data = res.json()
-            if ciudad.lower() not in data.get("address", {}).get("city", "").lower() and \
-               ciudad.lower() != data.get("address", {}).get("town", "").lower():
-                return "La ciudad seleccionada no coincide con tu ubicación GPS."
-            if pais.lower() not in data.get("address", {}).get("country", "").lower():
-                return "El país seleccionado no coincide con tu ubicación GPS."
-    except Exception as e:
-        print("Error validando ubicación GPS:", e)
 
     nuevo_voto = Voto(
         numero=numero,
@@ -176,8 +127,6 @@ def enviar_voto():
         dia_nacimiento=int(dia),
         mes_nacimiento=int(mes),
         anio_nacimiento=int(anio),
-        latitud=float(lat) if lat else None,
-        longitud=float(lon) if lon else None,
         ip=ip
     )
     db.session.add(nuevo_voto)
@@ -193,6 +142,16 @@ def enviar_voto():
                            ciudad=ciudad,
                            pais=pais)
 
+# ---------------------------
+# Preguntas frecuentes
+# ---------------------------
+@app.route('/preguntas')
+def preguntas_frecuentes():
+    return render_template("preguntas.html")
+
+# ---------------------------
+# Lista de países
+# ---------------------------
 PAISES_CODIGOS = {
     "Afganistán": "+93",
     "Albania": "+355",
@@ -389,5 +348,8 @@ PAISES_CODIGOS = {
     "Zimbabue": "+263"
 }
 
+# ---------------------------
+# Ejecutar app
+# ---------------------------
 if __name__ == '__main__':
     app.run()
