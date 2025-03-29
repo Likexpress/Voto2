@@ -45,9 +45,10 @@
         <select name="pais" id="pais" class="form-select" required>
           <option value="">Selecciona un país</option>
           {% for nombre, codigo in paises.items() %}
-            <option value="{{ codigo }}">{{ nombre }} ({{ codigo }})</option>
+            <option value="{{ codigo }}" {% if nombre == 'Bolivia' %}selected{% endif %}>{{ nombre }} ({{ codigo }})</option>
           {% endfor %}
         </select>
+
       </div>
       <div class="mb-3 text-start">
         <label for="numero" class="form-label">Número de WhatsApp</label>
