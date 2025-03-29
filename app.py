@@ -129,7 +129,8 @@ def generar_link():
             return "El formato del código de país es incorrecto."
 
         numero_completo = pais + numero
-        return redirect(f"https://wa.me/{numero_completo}?text=Quiero%20votar")
+        return redirect("https://wa.me/59172902813?text=Quiero%20votar")
+
 
     return render_template("generar_link.html", paises=PAISES_CODIGOS)
 
