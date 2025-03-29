@@ -21,14 +21,22 @@ db_url = os.environ.get("DATABASE_URL", "sqlite:///votos.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
 
 # ---------------------------
 # Modelo de votos
 # ---------------------------
 class Voto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
+    numero = db.Column(db.String(50), unique=True, nullable=False, index=True)  # ✅ Índice agregado
+    ci = db.Column(db.BigInteger, unique=True, nullable=False, index=True)      # ✅ Índice agregado
+=======
     numero = db.Column(db.String(50), unique=True, nullable=False)
     ci = db.Column(db.BigInteger, unique=True, nullable=False)
+>>>>>>> 6b136e3a2f5e04e28d32e0a652c8991dababba96
     candidato = db.Column(db.String(100), nullable=False)
     pais = db.Column(db.String(100), nullable=False)
     ciudad = db.Column(db.String(100), nullable=False)
@@ -38,6 +46,11 @@ class Voto(db.Model):
     ip = db.Column(db.String(50), nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> 6b136e3a2f5e04e28d32e0a652c8991dababba96
 with app.app_context():
     db.create_all()
 
