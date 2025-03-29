@@ -7,12 +7,6 @@ requests
 SQLAlchemy
 Flask_SQLAlchemy
 python-dotenv
-flask
-twilio
-gunicorn
-SQLAlchemy
-psycopg2-binary
-flask_sqlalchemy
-phonenumbers
+flask-migrate
 
 
