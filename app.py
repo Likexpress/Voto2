@@ -88,12 +88,23 @@ def generar_link():
     if request.method == 'POST':
         pais = request.form.get('pais')
         numero = request.form.get('numero')
+
         if not pais or not numero:
             return "Por favor, selecciona un país e ingresa tu número."
+
         numero = numero.replace(" ", "").replace("-", "")
         if not pais.startswith("+"):
             return "El formato del código de país es incorrecto."
+
+        numero_completo = pais + numero
+
+        # 🔒 Verificar si ya votó
+        if Voto.query.filter_by(numero=numero_completo).first():
+            return render_template("voto_ya_registrado.html")
+
+        # Si no ha votado, lo redirige al WhatsApp
         return redirect("https://wa.me/59172902813?text=Quiero%20votar")
+
     return render_template("generar_link.html", paises=PAISES_CODIGOS)
 
 @app.route('/votar')
