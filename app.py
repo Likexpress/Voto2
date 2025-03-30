@@ -53,6 +53,12 @@ def whatsapp_webhook():
             token = serializer.dumps("+" + numero)
             link = f"https://primariasbunker.org/votar?token={token}"
 
+            # Guardar en la base de datos si no existe
+            if not Solicitud.query.filter_by(numero="+" + numero).first():
+                nueva_solicitud = Solicitud(numero="+" + numero)
+                db.session.add(nueva_solicitud)
+                db.session.commit()
+
             # Enviar mensaje por 360dialog
             url = "https://waba-v2.360dialog.io/messages"
             headers = {
@@ -100,6 +106,10 @@ class Voto(db.Model):
     ip = db.Column(db.String(50), nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Solicitud(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    numero = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 with app.app_context():
@@ -149,6 +159,11 @@ def votar():
 
     try:
         numero = serializer.loads(token)
+
+        # ✅ Verificar si el número está autorizado en la tabla de solicitudes
+        if not Solicitud.query.filter_by(numero=numero).first():
+            return "Acceso no autorizado. Debes solicitar el enlace desde WhatsApp."
+
     except BadSignature:
         return "Enlace inválido o alterado."
 
@@ -156,6 +171,7 @@ def votar():
         return render_template("voto_ya_registrado.html")
 
     return render_template("votar.html", numero=numero)
+
 
 # ---------------------------
 # Enviar voto
@@ -411,7 +427,6 @@ PAISES_CODIGOS = {
     "Zambia": "+260",
     "Zimbabue": "+263"
 }
-
 # ---------------------------
 # Ejecutar app
 # ---------------------------
