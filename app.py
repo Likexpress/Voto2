@@ -88,6 +88,7 @@ def whatsapp_webhook():
     return "ok", 200
 
 
+
 # ---------------------------
 # Modelo de votos
 # ---------------------------
@@ -194,7 +195,12 @@ def enviar_voto():
 
     ci = int(ci)
 
-    # Validar que no haya votado con ese número o CI
+    # Verificar si se superó el límite de 5 votos desde esta IP
+    votos_desde_ip = Voto.query.filter_by(ip=ip).count()
+    if votos_desde_ip >= 5:
+        return render_template("limite_ip.html")
+
+    # Verificar si ya votó con ese número o CI
     if Voto.query.filter((Voto.numero == numero) | (Voto.ci == ci)).first():
         return render_template("voto_ya_registrado.html")
 
@@ -221,6 +227,8 @@ def enviar_voto():
                            anio=anio,
                            ciudad=ciudad,
                            pais=pais)
+
+
 
 # ---------------------------
 # Preguntas frecuentes
