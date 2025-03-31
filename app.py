@@ -249,9 +249,21 @@ def enviar_voto():
 def preguntas_frecuentes():
     return render_template("preguntas.html")
 
+
 # ---------------------------
-# Lista de países
+# Borrar Datos
 # ---------------------------
+@app.route('/borrar_todo', methods=['POST'])
+def borrar_todo():
+    try:
+        db.session.query(Voto).delete()
+        db.session.query(Solicitud).delete()
+        db.session.commit()
+        return "✅ Base de datos restablecida."
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Error: {str(e)}"
+
 
 
 # ---------------------------
