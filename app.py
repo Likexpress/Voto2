@@ -253,16 +253,21 @@ def preguntas_frecuentes():
 # ---------------------------
 # Borrar Datos
 # ---------------------------
-@app.route('/borrar_todo', methods=['POST'])
-def borrar_todo():
+@app.route('/reset_db/<clave>')
+def reset_db(clave):
+    # Clave segura para evitar borrado accidental
+    if clave != os.environ.get("RESET_DB_KEY", "clave-reset"):
+        return "Acceso denegado."
+
     try:
+        # Elimina todos los registros de las tablas (pero no las tablas en sí)
         db.session.query(Voto).delete()
         db.session.query(Solicitud).delete()
         db.session.commit()
-        return "✅ Base de datos restablecida."
+        return "✅ Base de datos restablecida correctamente."
     except Exception as e:
-        db.session.rollback()
         return f"❌ Error: {str(e)}"
+
 
 
 
